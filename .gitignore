@@ -2,6 +2,7 @@
 node_modules/
 jspm_packages/
 dist
+src/config/google_sheets_key.json
 # dotenv environment variables file
 .env
 .env.test
