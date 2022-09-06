@@ -1,4 +1,5 @@
 {
+  "type": "module",
   "name": "es6_setup_node",
   "version": "1.0.0",
   "description": "A simple ES6 setup for node applications",
@@ -6,7 +7,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "rimraf dist && babel src --out-dir dist  --copy-files",
-    "start": "babel-node index.js",
+    "start": "node index.js",
     "start:dev": "nodemon --exec babel-node index.js"
   },
   "keywords": [

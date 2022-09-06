@@ -10,4 +10,4 @@ controller.healthCheck = async (req, res) => {
   }
 };
 
-module.exports = controller;
+export default controller;

@@ -2,10 +2,11 @@
 import express from "express";
 import bodyParser from "body-parser";
 import cors from "cors";
-import logger from './middleware/logger'
-import routes from './routes'
+import logger from './middleware/logger.js'
+import routes from './routes/index.js'
 // Requiring .env Configuration
-require("dotenv").config({ path: ".env" });
+import dotenv from 'dotenv'
+dotenv.config()
 
 const app = express();
 app.use(bodyParser.urlencoded({ extended: true })); //For body parser
@@ -30,4 +31,4 @@ app.get('/', async (req, res) => {
 
 app.use("/api", routes);
 
-module.exports = app;
+export default app;
