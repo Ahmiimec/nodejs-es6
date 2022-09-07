@@ -4,4 +4,4 @@ COPY package.json .
 RUN yarn
 COPY . ./
 EXPOSE 5000
-CMD ["node","index.js"]
+CMD ["yarn","dev"]
