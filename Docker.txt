@@ -1,0 +1,96 @@
+***Dockerfile needs to be created  ( to create personalized image )
+- A base image is required ( could be custom even )
+- package is copied separately compared to files , so that the layers get cached for better optimization
+
+***Once this is done ( build docker image ) 
+- build using 'docker build .'
+- build with name using 'docker build -t name .'
+- list all running docker images by 'docker image ls'
+- delete docker image instance using 'docker image rm id'
+
+*** Once you have docker image created ( Now create docker container )
+- using this command 'docker run -d --name newnamecontainer nameofimage'
+- use the -d flag for making container to start in detached mode ( which is exited from the cli )
+- use 'docker ps' to list all the containers
+
+*** After building and trying to access it through localhost:port ( It will miserably fail )
+- We used expose 5000 in dockerfile ( it is only for description purpose , can be removed no issues )
+- Docker can talk outside , but cannot let others communicate back in
+- thats why localhost cant access docker container
+- incoming traffic from 5000 routed to 5000 port 'docker run -p 5000:5000 -d --name newnamecontainer nameofimage'
+
+*** To enter interactive mode so you can look inside the container
+- We will use 'docker exec -it containername bash'
+- Your working directory was set to /app and now if you type in ls ( like in nginx or aws server )
+- It will list out all the files
+- you can exit the container by using 'exit' command
+
+*** DELETE 
+- to forcefully delete container 'docker rm containername -f'
+
+*** Files which arent required in the docker container 
+- Such as node_modules and Dockerfile
+- can be ignored using a docker ignore file
+
+*** If you make any code changes , they will not be rendered 
+- Because docker image is old (stale version) and doesn't pick from local
+- You would have to rebuild an image then the container to render your changes
+- For this we use 'bind mount volume'
+
+*** Create bind mount volume
+- This will allow your changes on local code to directly apply changes to docker image
+- creates a sync between local code with docker container
+- to bind you add -v flag with directory of code you are locally editing along with directory of code in container you want to replicate changes in
+- 'docker run -v D:\Amazon\es6_setup_node\:/app  -p 5000:5000 -d --name nodejs-container nodejs-image'
+- in windows you can use '%cd%' this gets the current directory rather than typing the whole directory address
+- 'docker run -v %cd%:/app  -p 5000:5000 -d --name nodejs-container nodejs-image'
+- for power shell you get current directory with ${pwd}
+- for macOS you get current directory with $(cd)
+- After running this and binding volume ,  change code and refresh
+- Must have failed miserably
+- the -v flag did bind and is changing the code internally in container
+- bringout nodemon :D 
+- add -L flag in package json when adding '"dev": "nodemon -L --exec babel-node index.js"'
+- rebuild the image and container
+
+*** If you delete anything in current directory such as node_modules
+- it will delete the node_modules in container directory due to binding mount
+- add another -v flag with /app/node_modules directory which will signify and take presidence 
+- this another volume wont be binded with the existing directory
+- this is called the annonymous bind
+
+*** If you add or change files in docker container such as 'touch newfile'
+- docker container will create a file on local directory as well
+- this is something BAD!
+- you create a read only bind mount for the container 
+- you do this by add ':ro' to your /app directory 
+- for example 'docker run -v ${pwd}:/app:ro -v /app/node_modules  -p 5000:5000 -d --name nodejs-container nodejs-image'
+
+*** To pick environment variables 
+- you add --env-file to your docker build command
+- for example 'docker run -v ${pwd}:/app:ro -v /app/node_modules --env-file ./.env  -p 5000:5001 -d --name nodejs-container nodejs-image'
+
+*** As you keep creating containers ( you are creating volumes )
+- anonymous volumes dont delete by themselves
+- to delete volumes associated to a container , you can pass a 'v' flag to rm
+- example 'docker rm containername -fv'
+
+*** Once you start deploying multiple docker containers it can get hectic to run commands
+- we create a docker compose file
+- create docker-compose.yml
+- yml is space sensitive
+- this compose file will automate our process
+- example ( already in code )
+- now run command 'docker-compose up -d'
+- notice how it creates image and container to include folder name with name given in compose file
+- if you want to delete everything together 'docker-compose -v' , v flag to remove anonymous binding
+
+
+*** Docker compose creates a stale image
+- if you run 'docker-compose -v' it will delete the container and network
+- but will not delete the image , hence faster compose up command
+- the issue is that if you change Dockerfile , and expect a new image
+- it will not build a new image rather it checks for 'foldername_appname'
+- this is a dumb check done by docker compose
+- we have to explain docker by using 'docker-compose -d --build'
+- this will force a new build
